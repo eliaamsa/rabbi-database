@@ -1,0 +1,256 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>מאגר מידע רבני קהילות - מערכת זיהוי אינטראקטיבית</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="min-h-screen">
+    <header class="bg-blue-900 text-white py-6 shadow-lg">
+        <div class="container mx-auto px-4">
+            <h1 class="text-4xl font-bold text-center">מאגר מידע רבני קהילות</h1>
+            <p class="text-center mt-2 text-xl">מערכת אינטראקטיבית לזיהוי וניהול מידע על רבני קהילות</p>
+        </div>
+    </header>
+    
+    <div class="container mx-auto px-4 py-6">
+        <div class="tabs flex border-b no-print mb-6">
+            <div class="tab cursor-pointer py-2 px-6 bg-gray-200 rounded-t-lg mr-1 font-bold tab-active" data-tab="map">
+                <i class="fas fa-map-marker-alt mr-2"></i>מפת זיהוי
+            </div>
+            <div class="tab cursor-pointer py-2 px-6 bg-gray-100 rounded-t-lg mr-1" data-tab="profiles">
+                <i class="fas fa-address-card mr-2"></i>פרופילים
+            </div>
+            <div class="tab cursor-pointer py-2 px-6 bg-gray-100 rounded-t-lg mr-1" data-tab="info">
+                <i class="fas fa-info-circle mr-2"></i>אודות המערכת
+            </div>
+        </div>
+        
+        <div id="mapTab" class="tab-content active">
+            <div class="controls bg-white p-4 rounded-lg shadow-md mb-6 no-print">
+                <div class="flex flex-wrap items-center">
+                    <button id="addMarkerBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md transition-colors duration-200 flex items-center mr-2 mb-2">
+                        <i class="fas fa-plus-circle mr-2"></i> הוסף זיהוי חדש
+                    </button>
+                    <button id="editMarkerBtn" disabled class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-md transition-colors duration-200 flex items-center mr-2 mb-2 opacity-50 cursor-not-allowed">
+                        <i class="fas fa-edit mr-2"></i> ערוך זיהוי נבחר
+                    </button>
+                    <button id="deleteMarkerBtn" disabled class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md transition-colors duration-200 flex items-center mr-2 mb-2 opacity-50 cursor-not-allowed">
+                        <i class="fas fa-trash-alt mr-2"></i> מחק זיהוי נבחר
+                    </button>
+                    <button id="saveAllBtn" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md transition-colors duration-200 flex items-center mr-2 mb-2">
+                        <i class="fas fa-save mr-2"></i> שמור את כל הנתונים
+                    </button>
+                    <button id="loadAllBtn" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-md transition-colors duration-200 flex items-center mr-2 mb-2">
+                        <i class="fas fa-download mr-2"></i> טען נתונים שמורים
+                    </button>
+                </div>
+                <div id="status" class="mt-3 font-bold text-blue-800"></div>
+            </div>
+            
+            <div class="search-box bg-white p-4 rounded-lg shadow-md mb-6 no-print">
+                <div class="flex flex-wrap items-center">
+                    <div class="relative flex-grow mr-2">
+                        <span class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                            <i class="fas fa-search text-gray-400"></i>
+                        </span>
+                        <input type="text" id="searchInput" class="block w-full pr-10 border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-right" placeholder="חפש לפי שם, תפקיד או קהילה...">
+                    </div>
+                    <button id="searchButton" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md transition-colors duration-200 flex items-center mr-2">
+                        <i class="fas fa-search mr-2"></i> חפש
+                    </button>
+                    <button id="clearSearchButton" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-md transition-colors duration-200 flex items-center">
+                        <i class="fas fa-times mr-2"></i> נקה חיפוש
+                    </button>
+                </div>
+            </div>
+            
+            <div class="image-container shadow-xl mb-8" id="imageWrapper">
+                <img src="images/main-image.jpg" class="main-image" id="mainImage" alt="תמונת רבני קהילות">
+                <div class="zoom-controls no-print">
+                    <button class="zoom-button" id="zoomIn" title="הגדל תצוגה"><i class="fas fa-plus"></i></button>
+                    <button class="zoom-button" id="zoomOut" title="הקטן תצוגה"><i class="fas fa-minus"></i></button>
+                    <button class="zoom-button" id="zoomReset" title="איפוס תצוגה"><i class="fas fa-undo"></i></button>
+                </div>
+            </div>
+            
+            <div id="markerForm" class="bg-white p-6 rounded-lg shadow-lg mb-6 hidden no-print">
+                <h3 class="text-2xl font-bold mb-4 text-blue-900 border-b pb-2">פרטי הרב</h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="form-group">
+                        <label for="rabbiName" class="block font-bold mb-1 text-gray-700">שם הרב:</label>
+                        <input type="text" id="rabbiName" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="rabbanit" class="block font-bold mb-1 text-gray-700">שם הרבנית:</label>
+                        <input type="text" id="rabbanit" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="position" class="block font-bold mb-1 text-gray-700">תפקיד:</label>
+                        <input type="text" id="position" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" placeholder="לדוגמה: רב קהילת..., ראש מוסד...">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="city" class="block font-bold mb-1 text-gray-700">עיר ושכונה:</label>
+                        <input type="text" id="city" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                </div>
+                
+                <h4 class="text-xl font-bold mt-6 mb-3 text-blue-800 border-b pb-1">פרטי התקשרות</h4>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="form-group">
+                        <label for="phone" class="block font-bold mb-1 text-gray-700">טלפון:</label>
+                        <input type="text" id="phone" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="email" class="block font-bold mb-1 text-gray-700">אימייל:</label>
+                        <input type="email" id="email" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                </div>
+                
+                <div class="form-group mt-4">
+                    <label for="socialLinks" class="block font-bold mb-1 text-gray-700">קישורים לרשתות חברתיות:</label>
+                    <textarea id="socialLinks" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" placeholder="קישורים מופרדים בפסיק"></textarea>
+                </div>
+                
+                <div class="form-group mt-4">
+                    <label for="personalImage" class="block font-bold mb-1 text-gray-700">קישור לתמונה אישית:</label>
+                    <input type="text" id="personalImage" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                
+                <div class="form-group mt-4">
+                    <label for="specialties" class="block font-bold mb-1 text-gray-700">תחומי פעילות מיוחדים:</label>
+                    <textarea id="specialties" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" placeholder="לדוגמה: נישואין, כשרות, הרצאות לנוער"></textarea>
+                </div>
+                
+                <div class="form-group mt-4">
+                    <label for="notes" class="block font-bold mb-1 text-gray-700">הערות נוספות:</label>
+                    <textarea id="notes" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"></textarea>
+                </div>
+                
+                <div class="flex justify-end mt-6">
+                    <button id="cancelMarkerBtn" class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-md transition-colors duration-200 flex items-center ml-3">
+                        <i class="fas fa-times mr-2"></i> בטל
+                    </button>
+                    <button id="saveMarkerBtn" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-md transition-colors duration-200 flex items-center">
+                        <i class="fas fa-save mr-2"></i> שמור פרטים
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <div id="profilesTab" class="tab-content hidden">
+            <div class="search-box bg-white p-4 rounded-lg shadow-md mb-6 no-print">
+                <div class="flex flex-wrap items-center">
+                    <div class="relative flex-grow mr-2">
+                        <span class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                            <i class="fas fa-search text-gray-400"></i>
+                        </span>
+                        <input type="text" id="profileSearchInput" class="block w-full pr-10 border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-right" placeholder="חפש לפי שם, תפקיד או קהילה...">
+                    </div>
+                    <button id="profileSearchButton" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md transition-colors duration-200 flex items-center mr-2">
+                        <i class="fas fa-search mr-2"></i> חפש
+                    </button>
+                    <button id="clearProfileSearchButton" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-md transition-colors duration-200 flex items-center">
+                        <i class="fas fa-times mr-2"></i> נקה חיפוש
+                    </button>
+                </div>
+            </div>
+            
+            <div id="profilesList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <!-- פרופילים ייווצרו כאן באמצעות JavaScript -->
+                <div class="profile-placeholder text-center p-8 bg-gray-100 rounded-lg text-gray-600">
+                    <i class="fas fa-user-slash text-5xl mb-4"></i>
+                    <p>לא נמצאו פרופילים. אנא הוסף פרופילים בעזרת מפת הזיהוי.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div id="infoTab" class="tab-content hidden bg-white p-6 rounded-lg shadow-md">
+            <h2 class="text-3xl font-bold mb-6 text-blue-900 border-b pb-2">אודות מערכת מאגר רבני הקהילות</h2>
+            
+            <div class="text-lg">
+                <p class="mb-4">מערכת זו נועדה לזיהוי ותיעוד פרטים אודות רבני קהילות המופיעים בתמונה המשותפת.</p>
+                
+                <h3 class="text-xl font-bold mt-8 mb-3 text-blue-800">הוראות שימוש:</h3>
+                <ol class="list-decimal mr-6 space-y-2">
+                    <li><strong>הוספת זיהוי:</strong> לחץ על כפתור "הוסף זיהוי חדש" ולאחר מכן לחץ על הפנים בתמונה אותן ברצונך לזהות.</li>
+                    <li><strong>מילוי פרטים:</strong> מלא את הטופס עם פרטי הרב הרלוונטיים.</li>
+                    <li><strong>שמירה:</strong> לחץ על "שמור פרטים" לשמירת המידע.</li>
+                    <li><strong>עריכה:</strong> לחץ על סמן קיים בתמונה ולאחר מכן על כפתור "ערוך זיהוי נבחר" כדי לעדכן פרטים.</li>
+                    <li><strong>חיפוש:</strong> השתמש בתיבת החיפוש כדי למצוא רב ספציפי לפי שם, תפקיד או קהילה.</li>
+                </ol>
+                
+                <h3 class="text-xl font-bold mt-8 mb-3 text-blue-800">מטרת המערכת:</h3>
+                <p class="mb-4">המערכת נועדה לשמש כמאגר מידע מרכזי עבור קהילות וארגונים, המאפשר גישה קלה לפרטי קשר ומידע אודות רבני הקהילות.</p>
+                
+                <h3 class="text-xl font-bold mt-8 mb-3 text-blue-800">פרטיות:</h3>
+                <p>כל המידע המוזן למערכת הינו לצורך שימוש פנימי בלבד. מילוי פרטי הקשר הוא אופציונלי.</p>
+            </div>
+        </div>
+    </div>
+    
+    <div id="profileModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden no-print">
+        <div class="bg-white rounded-lg shadow-2xl p-6 w-11/12 max-w-4xl max-h-90vh overflow-y-auto">
+            <div class="flex justify-between items-center border-b pb-3 mb-4">
+                <h3 class="text-2xl font-bold text-blue-900" id="modalTitle">פרטי הרב</h3>
+                <button class="text-gray-500 hover:text-gray-800 text-3xl focus:outline-none close-modal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div id="modalContent">
+                <!-- תוכן המודל ייווצר באמצעות JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <script src="js/script.js"></script>
+</body>
+</html>
