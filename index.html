@@ -54,7 +54,7 @@
             <p class="text-center mt-2 text-xl">מערכת אינטראקטיבית לזיהוי וניהול מידע על רבני קהילות</p>
         </div>
     </header>
-    
+
     <div class="container mx-auto px-4 py-6">
         <div class="tabs flex border-b no-print mb-6">
             <div class="tab cursor-pointer py-2 px-6 bg-gray-200 rounded-t-lg mr-1 font-bold tab-active" data-tab="map">
@@ -67,7 +67,7 @@
                 <i class="fas fa-info-circle mr-2"></i>אודות המערכת
             </div>
         </div>
-        
+
         <div id="mapTab" class="tab-content active">
             <div class="controls bg-white p-4 rounded-lg shadow-md mb-6 no-print">
                 <div class="flex flex-wrap items-center">
@@ -89,7 +89,7 @@
                 </div>
                 <div id="status" class="mt-3 font-bold text-blue-800"></div>
             </div>
-            
+
             <div class="search-box bg-white p-4 rounded-lg shadow-md mb-6 no-print">
                 <div class="flex flex-wrap items-center">
                     <div class="relative flex-grow mr-2">
@@ -106,7 +106,7 @@
                     </button>
                 </div>
             </div>
-            
+
             <div class="image-container shadow-xl mb-8" id="imageWrapper">
                 <img src="images/main-image.jpg" class="main-image" id="mainImage" alt="תמונת רבני קהילות">
                 <div class="zoom-controls no-print">
@@ -115,66 +115,66 @@
                     <button class="zoom-button" id="zoomReset" title="איפוס תצוגה"><i class="fas fa-undo"></i></button>
                 </div>
             </div>
-            
+
             <div id="markerForm" class="bg-white p-6 rounded-lg shadow-lg mb-6 hidden no-print">
                 <h3 class="text-2xl font-bold mb-4 text-blue-900 border-b pb-2">פרטי הרב</h3>
-                
+
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="form-group">
                         <label for="rabbiName" class="block font-bold mb-1 text-gray-700">שם הרב:</label>
                         <input type="text" id="rabbiName" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" required>
                     </div>
-                    
+
                     <div class="form-group">
                         <label for="rabbanit" class="block font-bold mb-1 text-gray-700">שם הרבנית:</label>
                         <input type="text" id="rabbanit" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
                     </div>
-                    
+
                     <div class="form-group">
                         <label for="position" class="block font-bold mb-1 text-gray-700">תפקיד:</label>
                         <input type="text" id="position" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" placeholder="לדוגמה: רב קהילת..., ראש מוסד...">
                     </div>
-                    
+
                     <div class="form-group">
                         <label for="city" class="block font-bold mb-1 text-gray-700">עיר ושכונה:</label>
                         <input type="text" id="city" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
                     </div>
                 </div>
-                
+
                 <h4 class="text-xl font-bold mt-6 mb-3 text-blue-800 border-b pb-1">פרטי התקשרות</h4>
-                
+
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="form-group">
                         <label for="phone" class="block font-bold mb-1 text-gray-700">טלפון:</label>
                         <input type="text" id="phone" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
                     </div>
-                    
+
                     <div class="form-group">
                         <label for="email" class="block font-bold mb-1 text-gray-700">אימייל:</label>
                         <input type="email" id="email" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
                     </div>
                 </div>
-                
+
                 <div class="form-group mt-4">
                     <label for="socialLinks" class="block font-bold mb-1 text-gray-700">קישורים לרשתות חברתיות:</label>
                     <textarea id="socialLinks" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" placeholder="קישורים מופרדים בפסיק"></textarea>
                 </div>
-                
+
                 <div class="form-group mt-4">
                     <label for="personalImage" class="block font-bold mb-1 text-gray-700">קישור לתמונה אישית:</label>
                     <input type="text" id="personalImage" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
                 </div>
-                
+
                 <div class="form-group mt-4">
                     <label for="specialties" class="block font-bold mb-1 text-gray-700">תחומי פעילות מיוחדים:</label>
                     <textarea id="specialties" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" placeholder="לדוגמה: נישואין, כשרות, הרצאות לנוער"></textarea>
                 </div>
-                
+
                 <div class="form-group mt-4">
                     <label for="notes" class="block font-bold mb-1 text-gray-700">הערות נוספות:</label>
                     <textarea id="notes" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"></textarea>
                 </div>
-                
+
                 <div class="flex justify-end mt-6">
                     <button id="cancelMarkerBtn" class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-md transition-colors duration-200 flex items-center ml-3">
                         <i class="fas fa-times mr-2"></i> בטל
@@ -185,7 +185,7 @@
                 </div>
             </div>
         </div>
-        
+
         <div id="profilesTab" class="tab-content hidden">
             <div class="search-box bg-white p-4 rounded-lg shadow-md mb-6 no-print">
                 <div class="flex flex-wrap items-center">
@@ -203,7 +203,7 @@
                     </button>
                 </div>
             </div>
-            
+
             <div id="profilesList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 <!-- פרופילים ייווצרו כאן באמצעות JavaScript -->
                 <div class="profile-placeholder text-center p-8 bg-gray-100 rounded-lg text-gray-600">
@@ -212,13 +212,13 @@
                 </div>
             </div>
         </div>
-        
+
         <div id="infoTab" class="tab-content hidden bg-white p-6 rounded-lg shadow-md">
             <h2 class="text-3xl font-bold mb-6 text-blue-900 border-b pb-2">אודות מערכת מאגר רבני הקהילות</h2>
-            
+
             <div class="text-lg">
                 <p class="mb-4">מערכת זו נועדה לזיהוי ותיעוד פרטים אודות רבני קהילות המופיעים בתמונה המשותפת.</p>
-                
+
                 <h3 class="text-xl font-bold mt-8 mb-3 text-blue-800">הוראות שימוש:</h3>
                 <ol class="list-decimal mr-6 space-y-2">
                     <li><strong>הוספת זיהוי:</strong> לחץ על כפתור "הוסף זיהוי חדש" ולאחר מכן לחץ על הפנים בתמונה אותן ברצונך לזהות.</li>
@@ -227,16 +227,16 @@
                     <li><strong>עריכה:</strong> לחץ על סמן קיים בתמונה ולאחר מכן על כפתור "ערוך זיהוי נבחר" כדי לעדכן פרטים.</li>
                     <li><strong>חיפוש:</strong> השתמש בתיבת החיפוש כדי למצוא רב ספציפי לפי שם, תפקיד או קהילה.</li>
                 </ol>
-                
+
                 <h3 class="text-xl font-bold mt-8 mb-3 text-blue-800">מטרת המערכת:</h3>
                 <p class="mb-4">המערכת נועדה לשמש כמאגר מידע מרכזי עבור קהילות וארגונים, המאפשר גישה קלה לפרטי קשר ומידע אודות רבני הקהילות.</p>
-                
+
                 <h3 class="text-xl font-bold mt-8 mb-3 text-blue-800">פרטיות:</h3>
                 <p>כל המידע המוזן למערכת הינו לצורך שימוש פנימי בלבד. מילוי פרטי הקשר הוא אופציונלי.</p>
             </div>
         </div>
     </div>
-    
+
     <div id="profileModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden no-print">
         <div class="bg-white rounded-lg shadow-2xl p-6 w-11/12 max-w-4xl max-h-90vh overflow-y-auto">
             <div class="flex justify-between items-center border-b pb-3 mb-4">
